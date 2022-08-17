@@ -17,29 +17,34 @@ def main():
           key_carl["keyid"]: key_carl,
       },
       "steps": [{
-          "name": "clone",
+          "name": "create_allowlist",
           "expected_materials": [],
-          "expected_products": [["CREATE", "demo-project/foo.py"], ["DISALLOW", "*"]],
+          "expected_products": [["CREATE", "/root/allowlist.txt"], ["DISALLOW", "*"]],
           "pubkeys": [key_bob["keyid"]],
           "expected_command": [
-              "git",
-              "clone",
-              "https://github.com/in-toto/demo-project.git"
+              "/root/keylime-dev/scripts/create_allowlist.sh",
+              "-o",
+              "~/allowlist.txt",
+              "-h",
+              "sha256sum"
           ],
           "threshold": 1,
         },{
-          "name": "update-version",
-          "expected_materials": [["MATCH", "demo-project/*", "WITH", "PRODUCTS",
-                                "FROM", "clone"], ["DISALLOW", "*"]],
-          "expected_products": [["MODIFY", "demo-project/foo.py"], ["DISALLOW", "*"]],
-          "pubkeys": [key_bob["keyid"]],
-          "expected_command": [],
+          "name": "create_binary",
+          "expected_materials": [],
+          "expected_products": [["CREATE", "/test-binary.sh"], ["DISALLOW", "*"]],
+          "pubkeys": [key_carl["keyid"]],
+          "expected_command": [
+            "cp",
+            "/root/demo/test-binary.sh",
+            "/"
+          ],
           "threshold": 1,
         },{
-          "name": "package",
+          "name": "update_allowlist",
           "expected_materials": [
             ["MATCH", "demo-project/*", "WITH", "PRODUCTS", "FROM",
-             "update-version"], ["DISALLOW", "*"],
+             "create_allowlist"], ["DISALLOW", "*"],
           ],
           "expected_products": [
               ["CREATE", "demo-project.tar.gz"], ["DISALLOW", "*"],
