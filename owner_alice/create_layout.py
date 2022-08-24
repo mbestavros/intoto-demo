@@ -17,7 +17,7 @@ def main():
           key_carl["keyid"]: key_carl,
       },
       "steps": [{
-          "name": "create_allowlist",
+          "name": "create_allowlist_on_agent",
           "expected_materials": [],
           "expected_products": [["CREATE", "/root/allowlist.txt"], ["DISALLOW", "*"]],
           "pubkeys": [key_bob["keyid"]],
@@ -30,33 +30,66 @@ def main():
           ],
           "threshold": 1,
         },{
-          "name": "create_binary",
+          "name": "move_allowlist_to_verifier",
           "expected_materials": [],
-          "expected_products": [["CREATE", "/test-binary.sh"], ["DISALLOW", "*"]],
+          "expected_products": [["CREATE", "/home/vagrant/allowlist.txt"], ["DISALLOW", "*"]],
+          "pubkeys": [key_bob["keyid"]],
+          "expected_command": [
+              "scp",
+              "/root/allowlist.txt",
+              "vagrant@192.168.122.167:~"
+          ],
+          "threshold": 1,
+        },{
+          "name": "move_allowlist_to_root",
+          "expected_materials": [],
+          "expected_products": [["CREATE", "/root/allowlist.txt"], ["DISALLOW", "*"]],
           "pubkeys": [key_carl["keyid"]],
           "expected_command": [
             "cp",
-            "/root/demo/test-binary.sh",
-            "/"
+            "/home/vagrant/allowlist.txt",
+            "/root/"
+          ],
+          "threshold": 1,
+        },{
+          "name": "create_binary",
+          "expected_materials": [],
+          "expected_products": [["CREATE", "/root/demo/test-binary.sh"], ["DISALLOW", "*"]],
+          "pubkeys": [key_carl["keyid"]],
+          "expected_command": [
+            "chmod",
+            "+x",
+            "/root/demo/test-binary.sh"
+          ],
+          "threshold": 1,
+        },{
+          "name": "move_binary_to_agent",
+          "expected_materials": [],
+          "expected_products": [["CREATE", "/home/vagrant/test-binary.sh"], ["DISALLOW", "*"]],
+          "pubkeys": [key_carl["keyid"]],
+          "expected_command": [
+              "scp",
+              "/root/demo/test-binary.sh",
+              "vagrant@192.168.122.110:~"
           ],
           "threshold": 1,
         },{
           "name": "update_allowlist",
           "expected_materials": [
-            ["MATCH", "demo-project/*", "WITH", "PRODUCTS", "FROM",
-             "create_allowlist"], ["DISALLOW", "*"],
+            ["MATCH", "/root/demo/functionary_carl/*", "WITH", "PRODUCTS", "FROM",
+             "move_binary_to_agent"], ["DISALLOW", "*"],
           ],
           "expected_products": [
-              ["CREATE", "demo-project.tar.gz"], ["DISALLOW", "*"],
+              ["CREATE", "/root/keylime-policy-importer/keylime-policy.json"], ["DISALLOW", "*"],
           ],
           "pubkeys": [key_carl["keyid"]],
           "expected_command": [
-              "tar",
-              "--exclude",
-              ".git",
-              "-zcvf",
-              "demo-project.tar.gz",
-              "demo-project",
+              "python3",
+              "/root/keylime-policy-importer/importer.py",
+              "-l",
+              "/root/demo/functionary_carl/move_binary_to_agent.link",
+              "-a",
+              "/root/allowlist.txt",
           ],
           "threshold": 1,
         }],
