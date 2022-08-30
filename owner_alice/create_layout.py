@@ -37,7 +37,7 @@ def main():
           "expected_command": [
               "scp",
               "/root/allowlist.txt",
-              "vagrant@192.168.122.167:~"
+              "vagrant@192.168.122.57:~"
           ],
           "threshold": 1,
         },{
@@ -70,7 +70,7 @@ def main():
           "expected_command": [
               "scp",
               "/root/demo/test-binary.sh",
-              "vagrant@192.168.122.110:~"
+              "vagrant@192.168.122.98:~"
           ],
           "threshold": 1,
         },{
